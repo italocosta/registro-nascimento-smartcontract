@@ -2,6 +2,7 @@ package br.com.tcc.smartcontract.facade;
 
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +13,8 @@ import org.web3j.tuples.generated.Tuple6;
 
 import br.com.tcc.contracts.generated.RegistroNascimentoContract;
 import br.com.tcc.smartcontract.CustomGasProvider;
-import br.com.tcc.smartcontract.model.RegistroNascimento;
+import br.com.tcc.smartcontract.model.RegistroNascimentoRequest;
+import br.com.tcc.smartcontract.model.RegistroNascimentoResponse;
 
 @Component
 public class SmartContractFacade {
@@ -33,12 +35,12 @@ public class SmartContractFacade {
 		return contractAddress;
 	}
 	
-	public void registrar(String chavePrivadaUsuario, RegistroNascimento novoRegistro) throws Exception {
+	public void registrar(String chavePrivadaUsuario, RegistroNascimentoRequest novoRegistro) throws Exception {
 		BigInteger epoca = BigInteger.valueOf(novoRegistro.getDataNascimento().getTime()/1000);
-		getContrato(chavePrivadaUsuario).registra(novoRegistro.getChavePublica(),
+		getContrato(chavePrivadaUsuario).registra(novoRegistro.getEndereco(),
 				novoRegistro.getNome(),
-				novoRegistro.getChavePublicaMae(),
-				novoRegistro.getChavePublicaPai(), 
+				novoRegistro.getEnderecoMae(),
+				novoRegistro.getEnderecoPai(), 
 				epoca)
 		.send();
 	}
@@ -47,7 +49,7 @@ public class SmartContractFacade {
 		return getContrato(chavePrivadaUsuario).getAutorAddress().send();
 	}
 	
-	public RegistroNascimento recuperarMeusDados(String chavePrivadaUsuario) throws Exception {
+	public RegistroNascimentoResponse recuperarMeusDados(String chavePrivadaUsuario) throws Exception {
 		RegistroNascimentoContract contrato = getContrato(chavePrivadaUsuario);
 		Tuple6<String, String, String, String, BigInteger, BigInteger> dados = 
 				contrato.recuperaMeusDados().send();
@@ -57,7 +59,7 @@ public class SmartContractFacade {
 		Date dataRegistro = new Date();
 		dataRegistro.setTime(dados.component6().multiply(BigInteger.valueOf(1000)).longValue());
 		
-		RegistroNascimento meuRegistro = new RegistroNascimento(
+		RegistroNascimentoResponse meuRegistro = new RegistroNascimentoResponse(
 						dados.component1(),
 						dados.component2(),
 						dataNascimento,
@@ -67,7 +69,7 @@ public class SmartContractFacade {
 		return meuRegistro;
 	}
 	
-	public RegistroNascimento recuperarDadosOutro(String chavePrivadaUsuario, String chavePublicaOutro) throws Exception {
+	public RegistroNascimentoResponse recuperarDadosOutro(String chavePrivadaUsuario, String chavePublicaOutro) throws Exception {
 		RegistroNascimentoContract contrato = getContrato(chavePrivadaUsuario);
 		Tuple6<String, String, String, String, BigInteger, BigInteger> dados = 
 				contrato.recuperaDados(chavePublicaOutro).send();
@@ -77,7 +79,7 @@ public class SmartContractFacade {
 		Date dataRegistro = new Date();
 		dataRegistro.setTime(dados.component6().multiply(BigInteger.valueOf(1000)).longValue());
 		
-		RegistroNascimento meuRegistro = new RegistroNascimento(
+		RegistroNascimentoResponse meuRegistro = new RegistroNascimentoResponse(
 				dados.component1(),
 				dados.component2(),
 				dataNascimento,
@@ -85,5 +87,20 @@ public class SmartContractFacade {
 				dados.component3(),
 				dados.component4());
 		return meuRegistro;
+	}
+	
+	public List recuperarTodosRegistros(String chavePrivadaUsuario) throws Exception {
+		RegistroNascimentoContract contrato = getContrato(chavePrivadaUsuario);
+		List registros = contrato.recuperaTodosRegistros().send();
+		
+		return registros;
+	}
+
+	public String getContractAddress() {
+		return contractAddress;
+	}
+
+	public void setContractAddress(String contractAddress) {
+		this.contractAddress = contractAddress;
 	}
 }

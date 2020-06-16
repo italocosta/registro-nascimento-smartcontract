@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.8;
+pragma experimental ABIEncoderV2;
+
 
 contract RegistroNascimentoContract {
     
@@ -14,7 +16,8 @@ contract RegistroNascimentoContract {
         uint dataRegistro;
     }
     
-    mapping (address => Cidadao) private registros;
+    mapping (address => uint) private registros;
+    Cidadao[] private cidadaos;
     
     modifier temAutorizacaoAdmin(){
         require(msg.sender == autorAddress, "Sem permissão para realizar operação");
@@ -23,14 +26,7 @@ contract RegistroNascimentoContract {
     }
     
     modifier temRegistro(){
-        require(registros[msg.sender].endereco != address(0), "Nenhum registro encontrado");
-        
-        _;
-    }
-    
-    modifier temRegistroAdmin(){
-        require(msg.sender == autorAddress, "Sem permissão para realizar operação");
-        require(registros[msg.sender].endereco != address(0), "Nenhum registro encontrado");
+        require(registros[msg.sender] != 0, "Nenhum registro encontrado");
         
         _;
     }
@@ -44,19 +40,22 @@ contract RegistroNascimentoContract {
                       address maeEndereco,
                       address paiEndereco,
                       uint dataNascimento) public temAutorizacaoAdmin {
-                          
-        registros[cidadaoEndereco] = Cidadao(cidadaoEndereco, nomeCidadao, maeEndereco, paiEndereco, dataNascimento, now);
-        
+        cidadaos.push(Cidadao(cidadaoEndereco, nomeCidadao, maeEndereco, paiEndereco, dataNascimento, now));
+        registros[cidadaoEndereco] = cidadaos.length;
     }
     
-    function recuperaDados(address cidadaoEndereco) public view temRegistroAdmin 
+    function recuperaDados(address cidadaoEndereco) public view temAutorizacaoAdmin 
         returns (address enderecoCidadao,
                  string memory nomeCidadao,
                  address maeEndereco,
                  address paiEndereco,
                  uint dataNascimento,
                  uint dataRegistro) {
-        Cidadao memory c = registros[cidadaoEndereco];
+        
+        require(registros[cidadaoEndereco] != 0, "Nenhum registro encontrado");
+        
+        uint indice = registros[cidadaoEndereco];
+        Cidadao memory c = cidadaos[indice-1];
         return (c.endereco, c.nome, c.mae, c.pai, c.dataNascimento, c.dataRegistro);
     }
     
@@ -67,12 +66,22 @@ contract RegistroNascimentoContract {
                  address paiEndereco,
                  uint dataNascimento,
                  uint dataRegistro) {
-        Cidadao memory c = registros[msg.sender];
+        
+        uint indice = registros[msg.sender];
+        Cidadao memory c = cidadaos[indice-1];
         return (c.endereco, c.nome, c.mae, c.pai, c.dataNascimento, c.dataRegistro);
     }
     
     function getAutorAddress() public view returns (address) {
         return autorAddress;
+    }
+    
+    function recuperaTodosRegistros() public temAutorizacaoAdmin view returns (address[] memory) {
+    	address[] memory enderecos = new address[](cidadaos.length);
+    	for (uint i = 0; i < cidadaos.length; i++) {
+    		enderecos[i] = cidadaos[i].endereco;
+    	}
+       	return enderecos;
     }
     
 }

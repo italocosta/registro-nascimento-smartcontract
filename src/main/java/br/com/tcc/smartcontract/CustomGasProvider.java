@@ -18,7 +18,7 @@ import org.web3j.tx.gas.StaticGasProvider;
 
 public class CustomGasProvider extends StaticGasProvider {
     public static final BigInteger GAS_LIMIT = BigInteger.valueOf(3_000_000);
-    public static final BigInteger GAS_PRICE = BigInteger.valueOf(4_100_000_000L);
+    public static final BigInteger GAS_PRICE = BigInteger.valueOf(41_000_000_000L);
 
     public CustomGasProvider() {
         super(GAS_PRICE, GAS_LIMIT);

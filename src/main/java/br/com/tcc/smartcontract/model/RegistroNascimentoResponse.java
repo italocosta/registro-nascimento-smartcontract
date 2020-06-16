@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data @AllArgsConstructor
-public class RegistroNascimento {
+public class RegistroNascimentoResponse {
 
 	private String chavePublica;
 	private String nome;
@@ -16,8 +16,8 @@ public class RegistroNascimento {
 	private Date dataNascimento;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy", timezone = "America/Sao_Paulo")
 	private Date dataRegistro;
-	private String chavePublicaMae;
-	private String chavePublicaPai;
+	private String enderecoMae;
+	private String enderecoPai;
 	
 	
 }

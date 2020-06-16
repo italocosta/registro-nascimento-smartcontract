@@ -38,6 +38,18 @@ public class ContratoResource {
 		}
 	}
 	
+	@PostMapping("carrega")
+	@ApiOperation(value = "Carrega contrato e abandona o anterior")
+	public ResponseEntity carrega(String enderecoContrato) {
+		try {
+			service.carregaContrato(enderecoContrato);
+			return ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+		}
+	}
+	
 	@GetMapping("/autor")
 	@ApiOperation(value = "Mostrar o autor do contrato")
 	public ResponseEntity<String> getAutorContrato(String chavePrivadaUsuario) {

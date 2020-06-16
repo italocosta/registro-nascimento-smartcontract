@@ -9,13 +9,17 @@ import br.com.tcc.smartcontract.facade.SmartContractFacade;
 public class ContratoService {
 	
 	@Autowired
-	private SmartContractFacade contractFacade;
+	private SmartContractFacade contratoFacade;
 	
 	public String criaContrato(String chavePrivadaAutor) throws Exception {
-		return contractFacade.criar(chavePrivadaAutor);
+		return contratoFacade.criar(chavePrivadaAutor);
+	}
+	
+	public void carregaContrato(String enderecoContrato) {
+		contratoFacade.setContractAddress(enderecoContrato);
 	}
 
 	public String recuperaAutor(String chavePrivadaUsuario) throws Exception {
-		return contractFacade.recuperarAutor(chavePrivadaUsuario);
+		return contratoFacade.recuperarAutor(chavePrivadaUsuario);
 	}
 }
